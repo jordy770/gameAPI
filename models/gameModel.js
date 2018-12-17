@@ -5,7 +5,11 @@ var gameModel = new Schema({
     title: {type: String},
     developer: {type: String},
     genre: {type: String},
-    played: {type: Boolean, default:false}
+    played: {type: String, default:false},
+    _links: {
+        self: {href: {type: String}},
+        collection: {href: {type: String}}
+    }
 });
 
 module.exports = mongoose.model('Game', gameModel);

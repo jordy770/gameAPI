@@ -5,8 +5,9 @@ var routes = function (Game) {
 
     var gameController = require('../controllers/gameController')(Game)
     gameRouter.route('/')
+        
         .post(gameController.post)
-        .get(gameController.get);
+        .get(gameController.get)
 
     gameRouter.use('/:gameId', function(req,res,next){
         Game.findById(req.params.gameId, function (err, game) {
@@ -26,26 +27,41 @@ var routes = function (Game) {
     gameRouter.route('/:gameId')
         .get(function (req, res) {
 
-            var returnGame = req.game.toJSON();
-
-            returnGame.links = {};
-            returnGame.links.toHome= 'http://' + req.headers.host + '/api/games/';
-            res.json(returnGame);
+            // var returnGame = req.game.toJSON();
+            res.json(req.game);
             
         })
 
         .put(function(req, res){    
-            req.game.title = req.body.title;
-            req.game.author = req.body.author;
-            req.game.genre = req.body.genre;
-            req.game.read = req.body.read;
-            req.game.save(function(err){
-                if (err)
-                res.status(500).send(err);
-                else{
-                    res.json(req.game);
-                }
-            });
+            // req.game.title = req.body.title;
+            // req.game.author = req.body.author;
+            // req.game.genre = req.body.genre;
+            // req.game.read = req.body.read;
+            // req.game.save(function(err){
+            //     if (err)
+            //     res.status(500).send(err);
+            //     else{
+            //         res.json(req.game);
+            //     }
+            // });
+            Game.findById(req.params.gameId,function(err,game){
+                if(!req.body.title || !req.body.developer || !req.body.genre){
+                     res.sendStatus(400)
+                     return
+     
+                   } else{
+                    game.title = req.body.title
+                    game.developer = req.body.developer
+                    game.genre = req.body.genre
+                    game.save(function(err){
+                         if(err)
+                             res.status(500).send(err)
+                         else{
+                             res.json(req.game)
+                         }
+     
+                     });
+            }})
         })
 
         .patch(function(req,res){
