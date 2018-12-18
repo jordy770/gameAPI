@@ -1,7 +1,7 @@
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var gameModel = new Schema({
+let gameModel = new Schema({
     title: {type: String},
     developer: {type: String},
     genre: {type: String},

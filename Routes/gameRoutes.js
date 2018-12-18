@@ -1,9 +1,9 @@
-var express = require('express');
+let express = require('express');
 
-var routes = function (Game) {
-    var gameRouter = express.Router();
+let routes = function (Game) {
+    let gameRouter = express.Router();
 
-    var gameController = require('../controllers/gameController')(Game)
+    let gameController = require('../controllers/gameController')(Game)
     gameRouter.route('/')
         
         .post(gameController.post)
@@ -26,24 +26,10 @@ var routes = function (Game) {
     });
     gameRouter.route('/:gameId')
         .get(function (req, res) {
-
-            // var returnGame = req.game.toJSON();
             res.json(req.game);
-            
         })
 
         .put(function(req, res){    
-            // req.game.title = req.body.title;
-            // req.game.author = req.body.author;
-            // req.game.genre = req.body.genre;
-            // req.game.read = req.body.read;
-            // req.game.save(function(err){
-            //     if (err)
-            //     res.status(500).send(err);
-            //     else{
-            //         res.json(req.game);
-            //     }
-            // });
             Game.findById(req.params.gameId,function(err,game){
                 if(!req.body.title || !req.body.developer || !req.body.genre){
                      res.sendStatus(400)
@@ -68,7 +54,7 @@ var routes = function (Game) {
             if(req.body._id)
                 delete req.body._id;
 
-            for(var p in req.body)
+            for(let p in req.body)
             {
                 req.game[p] = req.body[p];
             }

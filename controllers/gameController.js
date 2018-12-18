@@ -1,6 +1,6 @@
-var gameController = function (Game) {
+let gameController = function (Game) {
 
-    var post = function (req, res) {
+    let post = function (req, res) {
         
         let game = new Game(req.body);
         game._links.self.href = 'http://' + req.headers.host + '/api/' + game._id;
@@ -20,66 +20,59 @@ var gameController = function (Game) {
             })}
     }
 
-    var get = function (req, res) {
+    let get = function(req, res){
+            const perPage =  10
+            const page = req.params.start ||1
+            const start = parseInt(req.query.start)
+            const limit = parseInt(req.query.limit)
 
-        var query = {};
+            Game.find({})
 
-        if (req.query.genre) {
-            query.genre = req.query.genre;
-        }
-        Game.find(query, function (err, games) {
-            if (err)
-                res.status(500).send(err);
-            else {
-                
-                let collection = {
-                    items:  games,
-                    _links: {
-                        "self": {
-                            "href": 'http://' + req.headers.host + '/api/'
-                        }
-                    },
+            .skip((perPage * page)- perPage)
+            .limit(limit)
+
+            .exec(function(err, games){
+               Game.count().exec(function(err, count){
+                    if(err) return next(err)
+
+                    let maxPage = Math.ceil(count/limit)
+
+                    let paginate = {
+                    items: games,
+
+                    _links:{ self: {href: 'http://' + req.headers.host + '/api/'}},
+
                     pagination: {
-                        "currentPage": 1,
-                        "currentItems": 34,
-                        "totalPages": 1,
-                        "totalItems": 34,
-                        "_links": {
-                            "first": {
-                                "page": 1,
-                                "href": "https://docent.cmi.hro.nl/bootb/demo/notes/"
+                        currentPage: page,
+                        currentItems: limit || count ,
+                        totalPages: maxPage,
+                        totalItems: count,
+
+                        _links: {
+                            first: {
+                                page: 1,
+                                href: 'http://' + req.headers.host + '/api/?start=1$limit=' + limit
                             },
-                            "last": {
-                                "page": 1,
-                                "href": "https://docent.cmi.hro.nl/bootb/demo/notes/"
+                            last: {
+                                page: maxPage,
+                                href: 'http://' + req.headers.host + '/api/?start='+ ((count-limit)+1) + "&limit=" + limit
                             },
-                            "previous": {
-                                "page": 1,
-                                "href": "https://docent.cmi.hro.nl/bootb/demo/notes/"
+                            previous: {
+                                page: (page - 1) ,
+                                href: 'http://' + req.headers.host + '/api/?start='+(start - limit) + "&limit=" + limit
                             },
-                            "next": {
-                                "page": 1,
-                                "href": "https://docent.cmi.hro.nl/bootb/demo/notes/"
+                            next: {
+                                page: (page + 1),
+                                href: 'http://' + req.headers.host + '/api/?start='+(start + limit) + "&limit=" + limit
                             }
                         }
                     }
                 }
-            
-            // var returnGames = games;
-            // games.forEach(function (element, index, array) {
-            //     var newGame = element.toJSON();
-            //     newGame.links = {};
-            //     newGame.links.self = 'http://' + req.headers.host + '/api/' + newGame._id
-            //     returnGames.push(newGame);
-            // });
-            // res.json(returnGames);
-            res.json(collection);
-        };
-        
-    });
-}
-
-
+                res.json(paginate)
+            })
+            })
+    
+        }
 
 return {
     post: post,
